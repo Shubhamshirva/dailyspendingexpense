@@ -1,7 +1,9 @@
 
 import 'package:dailyspendingexpense/bloc/expense/expense_bloc.dart';
 import 'package:dailyspendingexpense/bloc/expense/expense_event.dart';
+import 'package:dailyspendingexpense/db/database_helper.dart';
 import 'package:dailyspendingexpense/models/expense.dart';
+import 'package:dailyspendingexpense/widgets/excel_exporter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -9,11 +11,14 @@ import 'package:intl/intl.dart';
 class AddExpenseDialog extends StatefulWidget {
   final int categoryId;
   final Expense? expenseToEdit; // Optional: if editing an existing expense
+  final String categoryName;
+
 
   const AddExpenseDialog({
     Key? key,
     required this.categoryId,
     this.expenseToEdit,
+    required this.categoryName
   }) : super(key: key);
 
   @override
@@ -57,7 +62,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     }
   }
 
-  void _submitExpense() {
+ Future<void> _submitExpense() async {
     if (_formKey.currentState!.validate()) {
       final String name = _nameController.text;
       final double amount = double.parse(_amountController.text);
@@ -69,6 +74,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           name: name,
           amount: amount,
           date: _selectedDate,
+          categoryName: widget.categoryName 
         );
         context.read<ExpenseBloc>().add(AddExpense(newExpense));
       } else {
@@ -80,6 +86,14 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         );
         context.read<ExpenseBloc>().add(UpdateExpense(updatedExpense));
       }
+
+    // final dbHelper = DatabaseHelper();
+    // final allExpenses = await dbHelper.getAllExpenses(); // Assuming you have this function
+    // print("expnse is ${allExpenses.toList()}");
+    // print("expnse is ${allExpenses.toString()}");
+
+    // final exporter = ExcelExporter();
+    // await exporter.exportExpensesToExcel(allExpenses);
       Navigator.of(context).pop();
     }
   }
